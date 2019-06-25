@@ -1,0 +1,98 @@
+################################################################################
+Pre-requisites: Fastest Fourier Transform in the West v 3, known better
+as FFTW, OpenMP Multithreading library..
+
+Install FFTW3 with options:
+
+CFLAGS:=-fPIC --prefix=/usr/local --enable-sse2 --enable-threads
+--enable-shared --with-pic --with-combined-threads
+
+For MacOS X users:
+Make sure you are using GCC, not CLang.
+
+Check with gcc --version .
+It should clearly state whether it is CLang or GCC.
+
+If it is CLang, then do the following:
+
+Install homebrew. Then execute the following:
+
+$brew search gcc
+
+(Without the $, of course)
+Then You will find homebrew/dupes/apple-gcc42 as one of the options.
+Next execute
+
+$brew install homebrew/dupes/apple-gcc42
+
+Make sure the binaries have been linked.
+
+Finally, put the following line in your /etc/bashrc or ~/.bash_profile
+(Mac):
+
+export PATH=/usr/local/bin:$PATH
+
+################################# UPDATE #######################################
+UPDATES:
+1. apple-gcc42 does not work post MacOS X 10.9, i.e. Maverics. Hence, install the
+latest version of GCC available.
+################################################################################
+
+Then save changes, and either open a new terminal window or source the
+rc file you changed to continue installing FFTW.
+
+DCMT is now included in the release.
+
+
+Then you can execute the following, in order, to make this library:
+
+make
+sudo make install #The sudo is optional, use only if /usr/local is not user writable.
+make pywrapper #May need to run with sudo
+
+Optionally run 'make testc' to ensure that the C library functions are themselves
+functioning properly.
+
+After this, you should be able to execute the following:
+
+import magfieldgen (in python)
+
+bx , by , bz = magfieldgen.magfield ( nx , ny , nz , lx , ly , lz , range , variance , (optional: threads ) )
+
+bx, by, bz will be returned as numpy arrays ( nx , ny, nz ) , double.
+
+Also, a complete implementation of the magnetic field based jobs is provided in
+examples that comes with a pretty comprehensive changelog.
+
+######################### CLEANUPS #############################################
+Use "$make clean" to remove the built library and test executable binaries.
+Use "$make spotless" to clean, as well as restore the python wrapper to pristine
+condition.
+Use "$make pyclean" to do all of the above, as well as clean the directories
+created by "python setup.py install". This basically reverts the whole directory
+structure to the same state as it was when the code was written (unless you made
+some changes on your own).
+
+the C library is not meant for standalone use in a C program. Still if you want
+to, do the following:
+
+1. Link the C library against your own program:
+Copy the magfieldgen.h file from include/ to /usr/local/include and use the
+-lmagfieldgen flag to link the library. You may need to compile with the following
+options:
+-lm -lfftw3 -fopenmp -ldcmt
+This is not tested, so you shall have to try on your own. May be you can try that
+and extend this code and Makefile :)
+
+######################### UNINSTALLATION #######################################
+$make uninstall will do. In case you invoked make install with sudo, do so with
+make uninstall too. This will remove the library from /usr/local/lib, and also
+delete the python package installed.
+
+######################### SUGGESTIONS ##########################################
+Since the whole code is memory intensive, don't get too happy even if you have
+lots of CPU cores to spare. In fact, if you use too many threads you may even
+achieve a lot slower performance. Running a benchmark before embarking into
+using the code is suggested.
+
+Happy coding!
